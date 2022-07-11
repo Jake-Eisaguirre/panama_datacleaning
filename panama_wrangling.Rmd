@@ -16,7 +16,7 @@ if (!require(librarian)){
 
 # librarian downloads, if not already downloaded, and reads in needed packages
 
-librarian::shelf(tidyverse, here, janitor, lubridate, parsedate)
+librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, naniar)
 
 ```
 
@@ -88,12 +88,41 @@ var_environ <- date_environ %>%
 ```{r}
 
 survey_table <- mutate_all(var_environ, str_to_lower) %>% 
-  select(c((1:3), (6:15), (21:35)))
+  select(c((1:5), (6:15), (21:35)))
+
+```
+
+### create `visit_table` from `survey_table`
+```{r}
+
+#unique relationship for the visit_table is found in the date and survey time (night or day)
+visit_table <- survey_table %>% 
+  select(c(sort_id, merge_id, survey_id, date, survey_time, notes_survey, region, site)) %>% 
+  group_by(date, survey_time) %>% 
+  mutate(visit_id = cur_group_id())
+
+```
+
+### save `visit_table` csv
+```{r}
+
+write.csv(visit_table, here("data", "visit_table.csv"))
 
 ```
 
 
-### save survey meta data csv
+### add `new_survey_id` based on date and detection type
+```{r}
+
+#survey table unique relationship is the date and survey_time
+survey_table <- survey_table %>% 
+  select(!c(notes_survey)) %>% 
+  mutate(survey_id = as.numeric(survey_id)) %>% 
+  group_by(date, detection_type) %>% 
+  mutate(new_survey_id = cur_group_id())
+```
+
+### save `survey_table` csv
 ```{r}
 
 write.csv(survey_table, here("data", "survey_table.csv"))
@@ -101,11 +130,16 @@ write.csv(survey_table, here("data", "survey_table.csv"))
 ```
 
 
-### Pull out site data for sites table and keep a survey table
+### Pull out site data for `sites_table` and add unique id
 ```{r}
 
 site_data <- var_environ %>% 
   select(c(sort_id, merge_id, survey_id, region, site, utmz, utme, utmn, var_m, elevation_m))
+
+# site table unique relationship is the site and region
+site_table <- site_data %>% 
+  group_by(site, region) %>% 
+  mutate(site_id = cur_group_id())
 
 ```
 
@@ -113,7 +147,7 @@ site_data <- var_environ %>%
 ### save sites data csv
 ```{r}
 
-write.csv(site_data, here("data", "site_data.csv"))
+write.csv(site_data, here("data", "site_table.csv"))
 
 ```
 
@@ -122,7 +156,8 @@ write.csv(site_data, here("data", "site_data.csv"))
 ```{r}
 
 surv <- pan_data %>% 
-  select(c((1:3),(36:72)))
+  select(c(date, detection_type, (1:3),(36:72))) %>% 
+  mutate(date = parse_date(date))
 
 ```
 
@@ -161,12 +196,15 @@ col_clean_bio <- infec_status_bio %>%
 
 ### Now we want to pull table `col_clean_bio` apart for the 2 different detection types: `capture` and `call`/`visual`
 ```{r}
-
+# `sort_id` is the unique id and the unique relationship is in the date and detection type
 vis_call_bio <- col_clean_bio %>% 
   filter(detection_type %in% c("call", "visual")) %>% 
   select(!c(frog_mass_g, dead, infection_status, pcr, bdswab, gen_samp, bacteria_swab, am_ps, photo_check_needed, notes_species_merge, 
             notes_pc_rdata, missing_dat, swab_id))
 
+
+
+# `sort_id` is the unique id and the unique relationship is in the date and detection type
 capture_bio <- col_clean_bio %>% 
   filter(detection_type == "capture")
 
