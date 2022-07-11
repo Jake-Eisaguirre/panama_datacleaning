@@ -114,12 +114,13 @@ write.csv(visit_table, here("data", "visit_table.csv"))
 ### add `new_survey_id` based on date and detection type
 ```{r}
 
-#survey table unique relationship is the date and survey_time
+#survey table unique relationship is the date and detection type
 survey_table <- survey_table %>% 
   select(!c(notes_survey)) %>% 
   mutate(survey_id = as.numeric(survey_id)) %>% 
   group_by(date, detection_type) %>% 
   mutate(new_survey_id = cur_group_id())
+  
 ```
 
 ### save `survey_table` csv
@@ -138,8 +139,9 @@ site_data <- var_environ %>%
 
 # site table unique relationship is the site and region
 site_table <- site_data %>% 
-  group_by(site, region) %>% 
-  mutate(site_id = cur_group_id())
+  group_by(site, region) %>%
+  mutate(location = "Panama") %>% 
+  mutate(site_id = cur_group_id()) 
 
 ```
 
@@ -196,15 +198,14 @@ col_clean_bio <- infec_status_bio %>%
 
 ### Now we want to pull table `col_clean_bio` apart for the 2 different detection types: `capture` and `call`/`visual`
 ```{r}
-# `sort_id` is the unique id and the unique relationship is in the date and detection type
+# `merge_id` is the unique id and the unique relationship is in the date and detection type
 vis_call_bio <- col_clean_bio %>% 
   filter(detection_type %in% c("call", "visual")) %>% 
   select(!c(frog_mass_g, dead, infection_status, pcr, bdswab, gen_samp, bacteria_swab, am_ps, photo_check_needed, notes_species_merge, 
-            notes_pc_rdata, missing_dat, swab_id))
+            notes_pc_rdata, missing_dat, swab_id)) 
 
 
-
-# `sort_id` is the unique id and the unique relationship is in the date and detection type
+# `merge_id` is the unique id and the unique relationship is in the date and detection type
 capture_bio <- col_clean_bio %>% 
   filter(detection_type == "capture")
 
@@ -220,4 +221,5 @@ write.csv(vis_call_bio, here("data", "visusal_aural.csv"))
 write.csv(capture_bio, here("data", "capture.csv"))
 
 ```
+
 
