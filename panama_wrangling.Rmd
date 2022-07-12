@@ -16,7 +16,7 @@ if (!require(librarian)){
 
 # librarian downloads, if not already downloaded, and reads in needed packages
 
-librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, naniar)
+librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table)
 
 ```
 
@@ -99,7 +99,8 @@ survey_table <- mutate_all(var_environ, str_to_lower) %>%
 visit_table <- survey_table %>% 
   select(c(sort_id, merge_id, survey_id, date, survey_time, notes_survey, region, site)) %>% 
   group_by(date, survey_time) %>% 
-  mutate(visit_id = cur_group_id())
+  mutate(visit_id = cur_group_id()) %>% 
+  filter(!duplicated(visit_id))
 
 ```
 
@@ -119,7 +120,8 @@ survey_table <- survey_table %>%
   select(!c(notes_survey)) %>% 
   mutate(survey_id = as.numeric(survey_id)) %>% 
   group_by(date, detection_type) %>% 
-  mutate(new_survey_id = cur_group_id())
+  mutate(new_survey_id = cur_group_id()) %>% 
+  filter(!duplicated(new_survey_id))
   
 ```
 
@@ -141,7 +143,8 @@ site_data <- var_environ %>%
 site_table <- site_data %>% 
   group_by(site, region) %>%
   mutate(location = "Panama") %>% 
-  mutate(site_id = cur_group_id()) 
+  mutate(site_id = cur_group_id()) %>% 
+  filter(!duplicated(site_id))
 
 ```
 
