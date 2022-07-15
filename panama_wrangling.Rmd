@@ -87,49 +87,49 @@ var_environ <- date_environ %>%
 
 ```
 
-### filter for irregular md values and get swab ids for those values
+### filter for irregular wind  values and get swab ids for those values
 ```{r}
 
-wind <- var_environ %>% 
-  filter(wind_speed_m_s %in% c("2.0, gust to 3.7", "1.1ph", "1.7 kt", "0ph", "3.9ph", ".4/s", "1.5ph", "1ph", "2ph",
-                             "1.7ph", "0.8 ph", "2.5 ph", "1.5 ph", "1.9 k/hr", "0.4/s", "1/s")) %>% 
-    select(c(wind_speed_m_s, swab_id, survey_id, region, site, date, detection_type, survey_time)) %>% 
-  mutate(correct_wind = "")
-
-write_csv(wind, here("wind_data_check.csv"))
+# wind <- var_environ %>% 
+#   filter(wind_speed_m_s %in% c("2.0, gust to 3.7", "1.1ph", "1.7 kt", "0ph", "3.9ph", ".4/s", "1.5ph", "1ph", "2ph",
+#                              "1.7ph", "0.8 ph", "2.5 ph", "1.5 ph", "1.9 k/hr", "0.4/s", "1/s")) %>% 
+#     select(c(wind_speed_m_s, swab_id, survey_id, region, site, date, detection_type, survey_time)) %>% 
+#   mutate(correct_wind = "")
+# 
+# write_csv(wind, here("wind_data_check.csv"))
 
 ```
 
 #### filter for irregular dis_02 values and get swab ids
 ```{r}
-dis_o2 <- var_environ %>% 
-  filter(dissolved_o2_percent > 100) %>% 
-  select(dissolved_o2_percent, swab_id, survey_id, region, site, date, detection_type, survey_time) %>% 
-  mutate(correct_o2 = "")
-
-write_csv(dis_o2, here("dis_02_check.csv"))
+# dis_o2 <- var_environ %>% 
+#   filter(dissolved_o2_percent > 100) %>% 
+#   select(dissolved_o2_percent, swab_id, survey_id, region, site, date, detection_type, survey_time) %>% 
+#   mutate(correct_o2 = "")
+# 
+# write_csv(dis_o2, here("dis_02_check.csv"))
 
 ```
 
 #### filter for irregular salinty values and get swab ids
 ```{r}
 
-sal <- var_environ %>% 
-  filter(salinity_insertunits > 0.1) %>% 
-  select(salinity_insertunits, swab_id, survey_id, region, site, date, detection_type, survey_time) %>% 
-  mutate(correct_salinity = "")
-
-write_csv(sal, here("sal_check.csv"))
+# sal <- var_environ %>% 
+#   filter(salinity_insertunits > 0.1) %>% 
+#   select(salinity_insertunits, swab_id, survey_id, region, site, date, detection_type, survey_time) %>% 
+#   mutate(correct_salinity = "")
+# 
+# write_csv(sal, here("sal_check.csv"))
 
 ```
 
 ### pull out both salinity columns and compare metrics
 ```{r}
-
-both_salin <- var_environ %>% 
-  select(c(salinity_moredetail, salinity_insertunits, swab_id, survey_id, region, site, date, detection_type, survey_time))
-
-write_csv(both_salin, here("bothSal_check.csv"))
+# 
+# both_salin <- var_environ %>% 
+#   select(c(salinity_moredetail, salinity_insertunits, swab_id, survey_id, region, site, date, detection_type, survey_time))
+# 
+# write_csv(both_salin, here("bothSal_check.csv"))
 ```
 
 
@@ -148,8 +148,8 @@ survey_table <- mutate_all(var_environ, str_to_lower) %>%
 visit_table <- survey_table %>% 
   select(c(sort_id, merge_id, survey_id, date, survey_time, notes_survey, region, site)) %>% 
   group_by(date, survey_time) %>% 
-  mutate(visit_id = cur_group_id()) %>% 
-  filter(!duplicated(visit_id))
+  mutate(visit_id = cur_group_id()) %>% # add unique id based on date and survey time
+  filter(!duplicated(visit_id)) # filter out duplicated unique id values
 
 ```
 
@@ -169,8 +169,8 @@ survey_table <- survey_table %>%
   select(!c(notes_survey)) %>% 
   mutate(survey_id = as.numeric(survey_id)) %>% 
   group_by(date, detection_type) %>% 
-  mutate(new_survey_id = cur_group_id()) %>% 
-  filter(!duplicated(new_survey_id))
+  mutate(new_survey_id = cur_group_id()) %>% #add unique id based on date and detection type
+  filter(!duplicated(new_survey_id)) # filter out duplicated unique id values
 
   
 ```
@@ -193,8 +193,11 @@ site_data <- var_environ %>%
 site_table <- site_data %>% 
   group_by(site, region) %>%
   mutate(location = "Panama") %>% 
-  mutate(site_id = cur_group_id()) %>% 
-  filter(!duplicated(site_id))
+  mutate(site_id = cur_group_id()) %>% # unique id based on site and region
+  filter(!duplicated(site_id)) %>% # filter out duplicated values
+  mutate(region = str_to_lower(region),
+         site = str_to_lower(site))
+
 
 ```
 
@@ -212,7 +215,7 @@ write.csv(site_table, here("data", "site_table.csv"))
 
 surv <- pan_data %>% 
   select(c(date, detection_type, (1:3),(36:72))) %>% 
-  mutate(date = parse_date(date)) %>% 
+  mutate(date = parse_date(date)) %>% # convert to iso 8601 date format
   select(!c(salinity0))
 
 ```
@@ -261,12 +264,12 @@ clean_bio <- col_clean_bio %>%
 ### pull out irregular svl and get swab  id
 ```{r}
 
-ireg_svl <- clean_bio %>% 
-  filter(svl_mm <= 10) %>% 
-  select(swab_id, svl_mm, date, survey_id, detection_type) %>% 
-  mutate(correct_svl = "")
-
-write_csv(ireg_svl, here("svl_check.csv"))
+# ireg_svl <- clean_bio %>% 
+#   filter(svl_mm <= 10) %>% 
+#   select(swab_id, svl_mm, date, survey_id, detection_type) %>% 
+#   mutate(correct_svl = "")
+# 
+# write_csv(ireg_svl, here("svl_check.csv"))
 
 ```
 
@@ -274,18 +277,19 @@ write_csv(ireg_svl, here("svl_check.csv"))
 
 ### Now we want to pull table `col_clean_bio` apart for the 2 different detection types: `capture` and `call`/`visual`
 ```{r}
-# `merge_id` is the unique id and the unique relationship is in the date and detection type
 vis_call_bio <- clean_bio %>% 
   filter(detection_type %in% c("call", "visual")) %>% 
   select(!c(dead, infection_status, pcr, bdswab, gen_samp, bacteria_swab, am_ps, notes_species_merge,
-            notes_pc_rdata, missing_dat, swab_id)) %>% 
+            notes_pc_rdata, missing_dat, swab_id)) %>% #filter call and visual surveys then remove any species 
+                                                        #level biological data columns with no data associated 
     mutate(vis_call_id = row_number())
 
 
-# `merge_id` is the unique id and the unique relationship is in the date and detection type
 capture_bio <- clean_bio %>% 
   filter(detection_type == "capture") %>% 
-  mutate(capture_id = row_number())
+  mutate(capture_id = row_number()) %>% 
+  mutate(notes_pcr_data = gsub( "[[:punct:]]" , " ", notes_pc_rdata), # remove strange punctuation found in columns that was messing up DB
+         qaq_csp = gsub("[[:punct:]]" , " ", qaq_csp))
 
 
 
