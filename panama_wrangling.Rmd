@@ -16,7 +16,7 @@ if (!require(librarian)){
 
 # librarian downloads, if not already downloaded, and reads in needed packages
 
-librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table)
+librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table, anytime)
 
 ```
 
@@ -25,6 +25,12 @@ librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table)
 
 pan_data <- read_csv(here("data", "panama_data.csv")) %>% 
   clean_names() # <- this function attempts to clean column names
+
+
+t <- pan_data %>% 
+  select(date, region, site, utmz, utme, utmn) %>% 
+  filter(region == "Fortuna",
+         site == "Alleman")
 
 ```
 
@@ -78,12 +84,12 @@ var_environ <- date_environ %>%
          dissolved_o2_percent = dis_o2, # insert units
          conductivity_insertunits = conductivity, #insert units
          tds_insertunits = tds, # insert units
-         salinity_insertunits = salinity, # insert units
+         salinity_small = salinity, # insert units
          cloud_cover_percent = cloud_cover,# double check this is correct
          humidity_percent = humidity, # double check this is correct
          pressure_hg = pressure_in_hg,
          number_observers = num_obs,
-         salinity_moredetail = salinity0) 
+         salinity_large = salinity0) 
 
 ```
 
@@ -137,7 +143,7 @@ var_environ <- date_environ %>%
 ```{r}
 
 survey_table <- mutate_all(var_environ, str_to_lower) %>% 
-  select(c((1:5), (6:15), (21:35), salinity_moredetail))
+  select(c((1:5), (6:15), (21:35), salinity_large))
 
 ```
 
@@ -192,7 +198,7 @@ site_data <- var_environ %>%
 # site table unique relationship is the site and region
 site_table <- site_data %>% 
   group_by(site, region) %>%
-  mutate(location = "Panama") %>% 
+  mutate(location = "panama") %>% 
   mutate(site_id = cur_group_id()) %>% # unique id based on site and region
   filter(!duplicated(site_id)) %>% # filter out duplicated values
   mutate(region = str_to_lower(region),
@@ -277,13 +283,19 @@ clean_bio <- col_clean_bio %>%
 
 ### Now we want to pull table `col_clean_bio` apart for the 2 different detection types: `capture` and `call`/`visual`
 ```{r}
-vis_call_bio <- clean_bio %>% 
-  filter(detection_type %in% c("call", "visual")) %>% 
+vis_bio <- clean_bio %>% 
+  filter(detection_type == "visual") %>% 
   select(!c(dead, infection_status, pcr, bdswab, gen_samp, bacteria_swab, am_ps, notes_species_merge,
             notes_pc_rdata, missing_dat, swab_id)) %>% #filter call and visual surveys then remove any species 
                                                         #level biological data columns with no data associated 
     mutate(vis_call_id = row_number())
 
+call_bio <- clean_bio %>% 
+  filter(detection_type == "call") %>% 
+  select(!c(dead, infection_status, pcr, bdswab, gen_samp, bacteria_swab, am_ps, notes_species_merge,
+            notes_pc_rdata, missing_dat, swab_id)) %>% #filter call and visual surveys then remove any species 
+                                                        #level biological data columns with no data associated 
+    mutate(vis_call_id = row_number())
 
 capture_bio <- clean_bio %>% 
   filter(detection_type == "capture") %>% 
@@ -293,15 +305,40 @@ capture_bio <- clean_bio %>%
 
 
 
+
+
+
 ```
 
 ### Now save the two tables `vis_call_bio` and `capture bio`
 ```{r}
 
-write.csv(vis_call_bio, here("data", "visusal_aural.csv"))
+write.csv(vis_bio, here("data", "ves.csv"))
+
+write.csv(call_bio, here("data", "call.csv"))
 
 write.csv(capture_bio, here("data", "capture.csv"))
 
+```
+
+
+```{r}
+
+
+time_check <- pan_data %>% 
+  select(region, site, date, start_time, end_time, capture_time, swab_id)
+
+greater_time_error <- time_check %>% 
+  filter(capture_time > end_time) %>% 
+  mutate(correct_capture_time = "")
+
+write.csv(greater_time_error, here("greater_time_error.csv"))
+
+less_time_error <- time_check %>% 
+  filter(capture_time < start_time) %>% 
+  mutate(correct_capture_time = "")
+
+write.csv(less_time_error, here("less_time_error.csv"))
 ```
 
 

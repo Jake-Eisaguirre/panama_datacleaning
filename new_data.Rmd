@@ -1,0 +1,32 @@
+---
+title: "new_data"
+author: "Jake Eisaguirre"
+date: "2022-10-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (!require(librarian)){
+  install.packages("librarian")
+  library(librarian)
+}
+
+# librarian downloads, if not already downloaded, and reads in needed packages
+
+librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, anytime, hms, readxl, openxlsx)
+```
+
+# read in worbook and make each sheet an object
+```{r}
+
+a <- loadWorkbook(here("data", "new_data", "panama_field.xlsx"))
+sheetNames <- sheets(a)
+for(i in 1:length(sheetNames))
+{
+  assign(sheetNames[i],readWorkbook(a,sheet = i))
+}
+
+```
+
