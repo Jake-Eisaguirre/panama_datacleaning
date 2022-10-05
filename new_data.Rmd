@@ -47,10 +47,19 @@ visit_table <- panama_field %>%
 write_csv(visit_table, here("data", "new_data", "clean_tables", "visit.csv"))
 ```
 
+# ind join table for detection type
+```{r}
+
+ind_join_table <- individuals %>% 
+  select(c(fulcrum_parent_id, detectiontype))
+
+```
+
 # pull out survey table
 ```{r}
 
 survey_table <- panama_field %>% 
+  inner_join(ind_join_table, by = c("fulcrum_id" = "fulcrum_parent_id")) %>% 
   select(!c(1:15)) %>% 
   select(!c(32:65)) %>% 
   select(!c(notes_site, end_date, utmn, utmz, utme, elevation, varm_transect_meters)) %>% 
@@ -79,7 +88,8 @@ survey_table <- panama_field %>%
          cloud_cover_percent = cloudcover,
          humidity_percent = humidity,
          wind_speed_ms = windspeed_metersseconds,
-         samp_loc = samploc)
+         samp_loc = samploc,
+         detection_type = detectiontype)
 
 write_csv(survey_table, here("data", "new_data", "clean_tables", "survey.csv"))
 ```
