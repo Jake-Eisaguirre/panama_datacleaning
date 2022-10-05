@@ -25,8 +25,157 @@ a <- loadWorkbook(here("data", "new_data", "panama_field.xlsx"))
 sheetNames <- sheets(a)
 for(i in 1:length(sheetNames))
 {
-  assign(sheetNames[i],readWorkbook(a,sheet = i))
+  assign(sheetNames[i], readWorkbook(a, sheet = i))
 }
 
+```
+
+# pull out visit table
+```{r}
+
+visit_table <- panama_field %>% 
+  select(!c(1:14)) %>% 
+  select(!c(13:66)) %>% 
+  select(c(site, start_date, surveytime, notes_site)) %>% 
+  mutate(site = str_to_lower(str_replace_all(site, " ", "_")),
+         start_date = format_iso_8601(start_date),
+         surveytime = if_else(surveytime == "", "day", surveytime)) %>% 
+  rename(visit_notes = notes_site,
+         date = start_date,
+         survey_time = surveytime)
+
+write_csv(visit_table, here("data", "new_data", "clean_tables", "visit.csv"))
+```
+
+# pull out survey table
+```{r}
+
+survey_table <- panama_field %>% 
+  select(!c(1:15)) %>% 
+  select(!c(32:65)) %>% 
+  select(!c(notes_site, end_date, utmn, utmz, utme, elevation, varm_transect_meters)) %>% 
+  mutate(site = str_to_lower(str_replace_all(site, " ", "_")),
+         start_date = format_iso_8601(start_date),
+         observers = str_to_lower(observers),
+         starttime = paste(starttime, "00", sep = ":"),
+         endtime = paste(endtime, "00", sep = ":"),
+         endtime = if_else(endtime == ":00", "NA", endtime),
+         surlength_time_minutes = if_else(endtime=="NA", "NA", surlength_time_minutes),
+         starttime = if_else(starttime == ":00", "NA", starttime)) %>% 
+  rename(date = start_date,
+         survey_time = surveytime,
+         number_observers = numobs,
+         start_time = starttime,
+         end_time = endtime,
+         duration_minutes = surlength_time_minutes,
+         pressure_hg = pressureinhg,
+         e_dna = edna,
+         air_temp_c = airtemp_c,
+         water_temp_c = watertemp_c,
+         p_h = ph,
+         conductivity_insertunits = conductivity,
+         tds_insertunits = tds,
+         salinity_small = salinity,
+         cloud_cover_percent = cloudcover,
+         humidity_percent = humidity,
+         wind_speed_ms = windspeed_metersseconds,
+         samp_loc = samploc)
+
+write_csv(survey_table, here("data", "new_data", "clean_tables", "survey.csv"))
+```
+
+# pull unique column from panama_field for joining to individual table
+```{r}
+
+join_table <- panama_field %>% 
+  select(c(fulcrum_id, start_date, surveytime, site))
+
+```
+
+
+# pull out aural table
+```{r}
+
+aural_table <- individuals %>% 
+  inner_join(join_table, by = c("fulcrum_parent_id" = "fulcrum_id")) %>% 
+  select(!c(1:11)) %>% 
+  filter(detectiontype == "call") %>% 
+  select(c(start_date, surveytime, site, species, detectiontype, quantity, microhab, 
+           captureloc, lifestage, sex, notes_amphib1)) %>% 
+  mutate(start_date = format_iso_8601(start_date),
+         site = str_to_lower(str_replace_all(site, " ", "_")),
+         species = str_to_lower(str_replace_all(species, " ", "_")),
+         detectiontype = "aural",
+         quantity = as.numeric(if_else(quantity == "", "1", quantity))) %>% 
+  rename(date = start_date,
+         survey_time = surveytime,
+         species_aural = species,
+         detection_type = detectiontype,
+         count = quantity,
+         detection_location = captureloc,
+         life_stage = lifestage,
+         notes_aural = notes_amphib1)
+
+
+write_csv(aural_table, here("data", "new_data", "clean_tables", "aural.csv"))
+```
+
+# pull out ves table
+```{r}
+
+ves_table <- individuals %>% 
+  inner_join(join_table, by = c("fulcrum_parent_id" = "fulcrum_id")) %>% 
+  select(!c(1:11)) %>% 
+  filter(detectiontype == "visual") %>% 
+  select(c(start_date, surveytime, site, species, detectiontype, quantity, captureloc, microhab,
+           lifestage, sex, notes_amphib1, notes_amphib2)) %>% 
+  unite(notes_aural, c(notes_amphib1, notes_amphib2), sep = " ") %>% 
+   mutate(start_date = format_iso_8601(start_date),
+         site = str_to_lower(str_replace_all(site, " ", "_")),
+         species = str_to_lower(str_replace_all(species, " ", "_")),
+         quantity = str_remove(quantity, "~"),
+         quantity = as.numeric(if_else(quantity == "", "1", quantity))) %>% 
+  rename(date = start_date,
+         survey_time = surveytime,
+         species_ves = species,
+         detection_type = detectiontype,
+         count = quantity,
+         detection_location = captureloc,
+         life_stage = lifestage)
+
+write_csv(ves_table, here("data", "new_data", "clean_tables", "ves.csv"))
+```
+
+# pull out capture table
+```{r}
+
+capture_table <- individuals %>% 
+  inner_join(join_table, by = c("fulcrum_parent_id" = "fulcrum_id")) %>% 
+  filter(detectiontype == "capture") %>% 
+  select(!c(1:11)) %>% 
+  unite(species_capture, c(species, species_other), sep = "") %>% 
+  unite(notes_capture, c(notes_amphib1, notes_amphib2), sep = "") %>% 
+  select(!c(26:40)) %>% 
+  mutate(start_date = format_iso_8601(start_date),
+         site = str_to_lower(str_replace_all(site, " ", "_")),
+         species_capture = str_to_lower(str_replace_all(species_capture, " ", "_")),
+         capturetime = paste(capturetime, "00", sep = ":"),
+         capturetime = if_else(capturetime == ":00", "", capturetime)) %>% 
+  rename(date = start_date,
+         survey_time = surveytime,
+         count = quantity,
+         detection_type = detectiontype,
+         time_of_capture = capturetime,
+         capture_trx_loc = captureloc,
+         microhabitat_type = microhab,
+         body_temp_c = bodytemp_c,
+         substrate_temp_c = substemp_c,
+         body_mass_g = frogmass_g,
+         life_stage = lifestage,
+         body_and_bag_mass_g = frogbag_mass_g,
+         bag_mass_g = mass_bag_g) %>% 
+  select(!c(norephinephrine_ml_to_inject_for_amps, norephinephrine_units_to_inject_for_amps))
+
+write_csv(capture_table, here("data", "new_data", "clean_tables", "capture.csv"))
 ```
 
