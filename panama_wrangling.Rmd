@@ -349,7 +349,7 @@ write_csv(dis_o2, here("dis_02_check.csv"))
 ### check dup ID
 ```{r}
 
-dup_id <- var_environ %>% 
+dup_id <- var_environ %>%  
   count(swab_id) %>% 
   filter(n>1)
 
