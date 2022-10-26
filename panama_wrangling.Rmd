@@ -288,37 +288,43 @@ time_check <- pan_data %>%
 
 greater_time_error <- time_check %>% 
   filter(capture_time > end_time) %>% 
-  mutate(correct_capture_time = "")
+  mutate(correct_capture_time = "",
+         end_time = as.character(end_time)) %>% 
+  filter(end_time > "03:00:00")
 
-write.csv(greater_time_error, here("greater_time_error.csv"))
+write.csv(greater_time_error, here("above_capture_error.csv"))
 
 less_time_error <- time_check %>% 
   filter(capture_time < start_time) %>% 
-  mutate(correct_capture_time = "")
+  mutate(correct_capture_time = "",
+         end_time = as.character(end_time)) %>% 
+  filter(end_time > "02:00:00",
+         end_time < "23:45:00")
 
-write.csv(less_time_error, here("less_time_error.csv"))
+write.csv(less_time_error, here("below_capture_error.csv"))
 ```
 
-#### filter for irregular salinty values and get swab ids
+#### see species notes
 ```{r}
 
-sal <- var_environ %>%
-  filter(salinity_large > 0.1) %>%
-  select(salinity_large, swab_id, survey_id, region, site, date, detection_type, survey_time) %>%
-  mutate(correct_salinity = "")
 
-write_csv(sal, here("sal_check.csv"))
+see_species <- pan_data %>% 
+  select(region, site, date, start_time, end_time, capture_time, species, swab_id) %>% 
+  filter(species %in% c("see notes", "unknown species")) %>% 
+  mutate(correct_species = "")
+
+write_csv(see_species, here("species_check.csv"))
 
 ```
 
 ### pull out both salinity columns and compare metrics
 ```{r}
 
-both_salin <- var_environ %>%
-  select(c(salinity_large, salinity_small, swab_id, survey_id, region, site, date, detection_type, survey_time)) %>% 
-  drop_na(salinity_large)
-
-write_csv(both_salin, here("bothSal_check.csv"))
+# both_salin <- var_environ %>%
+#   select(c(salinity_large, salinity_small, swab_id, survey_id, region, site, date, detection_type, survey_time)) %>% 
+#   drop_na(salinity_large)
+# 
+# write_csv(both_salin, here("bothSal_check.csv"))
 ```
 
 ### filter for irregular wind  values and get swab ids for those values
@@ -336,10 +342,10 @@ write_csv(wind, here("wind_data_check.csv"))
 
 #### filter for irregular dis_02 values and get swab ids
 ```{r}
-dis_o2 <- var_environ %>%
-  filter(dissolved_o2_percent > 100) %>%
-  select(dissolved_o2_percent, swab_id, survey_id, region, site, date, detection_type, survey_time) %>%
-  mutate(correct_o2 = "")
+# dis_o2 <- var_environ %>%
+#   filter(dissolved_o2_percent > 100) %>%
+#   select(dissolved_o2_percent, swab_id, survey_id, region, site, date, detection_type, survey_time) %>%
+#   mutate(correct_o2 = "")
 
 write_csv(dis_o2, here("dis_02_check.csv"))
 
@@ -356,41 +362,50 @@ dup_id <- var_environ %>%
 id_check <- pan_data %>% 
   select(region, site, date, detection_type, survey_time, species, swab_id) %>% 
   filter(swab_id %in% dup_id$swab_id) %>% 
-  drop_na(swab_id)
+  drop_na(swab_id) %>% 
+  filter(!site == "Rabbit Stream") %>% 
+  mutate(swab_id = sort(swab_id),
+         correct_swab_id = "")
+
+write_csv(id_check, here("duplicate_swabs.csv"))
 
 ```
 
 ### check SVL
 ```{r}
 
-svl_check <- capture_bio %>% 
-  select(svl_mm) %>% 
-  unique()
-  
-
-hist(svl_check$svl_mm)
+# svl_check <- capture_bio %>% 
+#   select(svl_mm) %>% 
+#   unique()
+#   
+# 
+# hist(svl_check$svl_mm)
 ```
 
 ### check mass
 ```{r}
 
-
-mass_check <- capture_bio %>% 
-  select(frog_mass_g) %>% 
-  unique()
-
-hist(mass_check$frog_mass_g)
+# 
+# mass_check <- capture_bio %>% 
+#   select(frog_mass_g) %>% 
+#   unique()
+# 
+# hist(mass_check$frog_mass_g)
 
 ```
 
 ### check conductivity
 ```{r}
 
-conductiity <- var_environ %>% 
-  select(conductivity_insertunits) %>% 
-  unique()
+conductiity <- pan_data %>% 
+  select(region, site, date, detection_type, survey_time, conductivity) %>%
+  drop_na(conductivity) %>% 
+  mutate(correct_conductivity = "",
+         conductivity = sort(conductivity, decreasing = T))
 
 hist(conductiity$conductivity_insertunits)
+
+write_csv(conductiity, here("conductivity_check.csv"))
 
 ```
 
