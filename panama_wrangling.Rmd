@@ -28,11 +28,19 @@ pan_data <- read_csv(here("data", "panama_data.csv")) %>%
 
 
 t <- pan_data %>% 
-  select(date, region, site, utmz, utme, utmn) %>% 
-  filter(region == "Fortuna",
-         site == "Alleman")
+  select(date, region, site, utmz, utme, utmn, species, swab_id) %>% 
+  filter(region == "El Valle",
+         site == "Jordinal")
 
 ```
+```{r}
+
+t <- pan_data %>% 
+  filter(region == "Fortuna")
+
+```
+
+
 
 # I am now going to split the data apart. The first data frame will contain meta_data and environmental variables
 ```{r}
@@ -309,7 +317,8 @@ write.csv(less_time_error, here("below_capture_error.csv"))
 
 
 see_species <- pan_data %>% 
-  select(region, site, date, start_time, end_time, capture_time, species, swab_id) %>% 
+  select(region, site, date, start_time, end_time, capture_time, species,
+         swab_id,photo, photo_id, notes_amphib1, notes_amphib2, notes_species_merge) %>% 
   filter(species %in% c("see notes", "unknown species")) %>% 
   mutate(correct_species = "")
 
@@ -330,13 +339,13 @@ write_csv(see_species, here("species_check.csv"))
 ### filter for irregular wind  values and get swab ids for those values
 ```{r}
 
-wind <- var_environ %>%
-  filter(wind_speed_m_s %in% c("2.0, gust to 3.7", "1.1ph", "1.7 kt", "0ph", "3.9ph", ".4/s", "1.5ph", "1ph", "2ph",
-                             "1.7ph", "0.8 ph", "2.5 ph", "1.5 ph", "1.9 k/hr", "0.4/s", "1/s")) %>%
-    select(c(wind_speed_m_s, swab_id, survey_id, region, site, date, detection_type, survey_time)) %>%
-  mutate(correct_wind = "")
-
-write_csv(wind, here("wind_data_check.csv"))
+# wind <- var_environ %>%
+#   filter(wind_speed_m_s %in% c("2.0, gust to 3.7", "1.1ph", "1.7 kt", "0ph", "3.9ph", ".4/s", "1.5ph", "1ph", "2ph",
+#                              "1.7ph", "0.8 ph", "2.5 ph", "1.5 ph", "1.9 k/hr", "0.4/s", "1/s")) %>%
+#     select(c(wind_speed_m_s, swab_id, survey_id, region, site, date, detection_type, survey_time)) %>%
+#   mutate(correct_wind = "")
+# 
+# write_csv(wind, here("wind_data_check.csv"))
 
 ```
 
@@ -359,13 +368,14 @@ dup_id <- var_environ %>%
   count(swab_id) %>% 
   filter(n>1)
 
+write_csv(dup_id, here("dup_id.csv"))
+
 id_check <- pan_data %>% 
-  select(region, site, date, detection_type, survey_time, species, swab_id) %>% 
+  select(region, site, date, observers, detection_type, survey_time, species, swab_id) %>% 
   filter(swab_id %in% dup_id$swab_id) %>% 
   drop_na(swab_id) %>% 
   filter(!site == "Rabbit Stream") %>% 
-  mutate(swab_id = sort(swab_id),
-         correct_swab_id = "")
+  mutate(swab_id = sort(swab_id))
 
 write_csv(id_check, here("duplicate_swabs.csv"))
 
@@ -397,15 +407,40 @@ write_csv(id_check, here("duplicate_swabs.csv"))
 ### check conductivity
 ```{r}
 
-conductiity <- pan_data %>% 
-  select(region, site, date, detection_type, survey_time, conductivity) %>%
-  drop_na(conductivity) %>% 
-  mutate(correct_conductivity = "",
-         conductivity = sort(conductivity, decreasing = T))
+# conductiity <- pan_data %>% 
+#   select(region, site, date, detection_type, survey_time, conductivity) %>%
+#   drop_na(conductivity) %>% 
+#   mutate(correct_conductivity = "",
+#          conductivity = sort(conductivity, decreasing = T))
+# 
+# hist(conductiity$conductivity_insertunits)
+# 
+# write_csv(conductiity, here("conductivity_check.csv"))
 
-hist(conductiity$conductivity_insertunits)
 
-write_csv(conductiity, here("conductivity_check.csv"))
+```
+# Date Checks with swab_ids
+```{r}
+
+pan_data <- read_csv(here("data", "panama_data.csv")) %>% 
+  clean_names() %>% 
+  select(region, site, observers, swab_id, date) %>% 
+  mutate(date = parse_date(date),
+         visit_date = date) %>% 
+  drop_na() %>% 
+  relocate(visit_date, .before = swab_id)
+
+swabs_date <- pan_data %>% 
+  mutate(swab_date = swab_id,
+         swab_date = gsub("_..*", "", swab_date),
+         date = str_remove(date, "20"),
+         date = str_remove_all(date, "-"),
+         identical = swabs_date$date == swabs_date$swab_date)
+
+non_matched_ids <- swabs_date %>% 
+  filter(identical == FALSE) %>% 
+  select(!c(date, swab_date))
+
 
 ```
 

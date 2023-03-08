@@ -1,23 +1,47 @@
-region,site,date,detection_type,survey_time,species,swab_id,correct_swab_id
-Fortuna,Alleman,12/9/2015,capture,night,Smilisca sila,150608_01,
-Fortuna,Alleman,12/9/2015,capture,night,Smilisca sila,150608_01,
-Fortuna,Alleman,12/9/2015,capture,night,Espadarana prosoblepon,151208_J01,
-Fortuna,Alleman,12/9/2015,capture,night,Espadarana prosoblepon,151208_J01,
-Fortuna,Alleman,12/9/2015,capture,night,Isthmohyla debilis,151209_J01,
-Fortuna,Alleman,12/9/2015,capture,night,Isthmohyla debilis,151209_J01,
-Fortuna,Alleman,12/9/2015,capture,night,Isthmohyla debilis,151209_J02,
-Fortuna,Alleman,12/9/2015,capture,night,Pristimantis cruentus,151209_J02,
-Santa Fe,Cerro Negro,12/8/2015,capture,day,Silverstoneia flotator,151209_J03,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J03,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J04,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J04,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J05,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J05,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J06,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J06,
-Santa Fe,Cerro Negro,12/9/2015,capture,day,unknown species,151209_J07,
-Fortuna,Fortuna loop,12/8/2015,capture,night,Pristimantis caryophyllaceus,151209_J07,
-El Valle,Jordinal,6/8/2015,capture,day,Lithobates warszewitschii,151209_J08,
-El Valle,Jordinal,6/8/2015,capture,day,Lithobates warszewitschii,151209_J08,
-El Cope,Sophia Stream,12/11/2019,capture,day,Silverstoneia flotator,191211_15,
-El Cope,Sophia Stream,12/11/2019,capture,night,Smilisca sila,191211_15,
+region,site,date,observers,detection_type,survey_time,species,swab_id
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Smilisca sila,151209_J01
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Smilisca sila,151209_J02
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Espadarana prosoblepon,151209_J03
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Espadarana prosoblepon,151209_J04
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Isthmohyla debilis,151209_J05
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Isthmohyla debilis,151209_J06
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Isthmohyla debilis,151209_J07
+Fortuna,Alleman,12/9/2015,"GMR, JLV",capture,night,Pristimantis cruentus,151209_J08
+Santa Fe,Cerro Negro,12/8/2015,"JM, Craig, John",capture,day,Silverstoneia flotator,151208_J01
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J01
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J02
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J03
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J04
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J05
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J06
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J07
+Santa Fe,Cerro Negro,12/9/2015,"JM, Craig, John",capture,day,unknown species,151209_J08
+Fortuna,Fortuna loop,12/8/2015,"GMR, JLV",capture,night,Pristimantis caryophyllaceus,151208_J01
+El Valle,Jordinal,6/8/2015,"AB, CRZ, JM",capture,day,Lithobates warszewitschii,150608_01
+El Valle,Jordinal,6/8/2015,"AB, CRZ, JM",capture,day,Lithobates warszewitschii,150608_01
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_01
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_01
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Colostethus panamensis,140527_02
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Colostethus panamensis,140527_02
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_03
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_03
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_04
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_04
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_05
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_05
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_06
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_06
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_07
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_07
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Hyalinobatrachium vireovittatum,140527_08
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Hyalinobatrachium vireovittatum,140527_08
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_09
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_09
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Diasporus vocator,140527_10
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Diasporus vocator,140527_10
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Silverstoneia flotator,140527_11
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Silverstoneia flotator,140527_11
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, RP, US",capture,day,Craugastor fitzingeri,140527_12
+Altos de Campana,Rabbit Stream,5/27/2014,"AE, US",capture,day,Craugastor fitzingeri,140527_12
+El Cope,Sophia Stream,12/11/2019,"KR, CC",capture,day,Silverstoneia flotator,191211_15
+El Cope,Sophia Stream,12/11/2019,"KB, JLV, CC, Elidio",capture,night,Smilisca sila,191211_15
