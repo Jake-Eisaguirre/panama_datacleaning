@@ -16,7 +16,7 @@ if (!require(librarian)){
 
 # librarian downloads, if not already downloaded, and reads in needed packages
 
-librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table, anytime)
+librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table, anytime, hms)
 
 ```
 
@@ -24,19 +24,28 @@ librarian::shelf(tidyverse, here, janitor, lubridate, parsedate, data.table, any
 ```{r}
 
 pan_data <- read_csv(here("data", "panama_data.csv")) %>% 
-  clean_names() # <- this function attempts to clean column names
+  clean_names()  # <- this function attempts to clean column names
+  # mutate(swab_id = if_else(survey_id == "446", str_replace(swab_id, "J", "G"), swab_id),
+  #        end_time = case_when(swab_id == "121112_03" ~ "22:15:00",
+  #                             swab_id == "121112_04" ~ "22:15:00",
+  #                             swab_id == "121112_05" ~ "22:15:00",
+  #                             swab_id == "121112_06" ~ "22:15:00",
+  #                             swab_id == "121112_07" ~ "22:15:00",
+  #                             swab_id == "121112_08" ~ "22:15:00",
+  #                             swab_id == "121112_09" ~ "22:15:00",
+  #                             TRUE ~ as.character(end_time)))
+  #       
 
-
-t <- pan_data %>% 
-  select(date, region, site, utmz, utme, utmn, species, swab_id) %>% 
-  filter(region == "El Valle",
-         site == "Jordinal")
+# t <- pan_data %>% 
+#   select(date, region, site, utmz, utme, utmn, species, swab_id) %>% 
+#   filter(region == "El Valle",
+#          site == "Jordinal")
 
 ```
 ```{r}
 
 t <- pan_data %>% 
-  filter(region == "Fortuna")
+  filter(region == "Altos de Campana")
 
 ```
 
@@ -274,6 +283,25 @@ capture_bio <- clean_bio %>%
 
 ```
 
+### Data Cleaning on `capture_bio`
+```{r}
+
+cap_bio_clean <- capture_bio %>% 
+  mutate(swab_id = if_else(sort_id == "5133", "NA", swab_id), # remove swab_id for escaped flotator
+         notes_amphib1 = if_else(swab_id == "121022_03", "Date and swab_id mismatch ok", notes_amphib1),
+         notes_amphib1 = if_else(swab_id == "121022_04", "Date and swab_id mismatch ok", notes_amphib1),
+         notes_amphib1 = if_else(swab_id == "131212_KC", "Date and swab_id mismatch ok", notes_amphib1),
+         notes_amphib1 = if_else(swab_id == "131212_KC2", "Date and swab_id mismatch ok", notes_amphib1),
+         notes_amphib1 = if_else(swab_id == "130706_R01", "off transect", notes_amphib1),
+         notes_amphib1 = if_else(swab_id == "130707_R09", "off transect", notes_amphib1))
+
+t <- capture_bio %>% 
+  filter(sort_id == "5133") 
+
+```
+
+
+
 ### Now save the two tables `vis_call_bio` and `capture bio`
 ```{r}
 
@@ -292,13 +320,14 @@ write.csv(capture_bio, here("data", "capture.csv"))
 
 
 time_check <- pan_data %>% 
-  select(region, site, date, start_time, end_time, capture_time, swab_id)
+  select(region, site, date, start_time, end_time, capture_time, capture_loc, swab_id)
 
 greater_time_error <- time_check %>% 
   filter(capture_time > end_time) %>% 
   mutate(correct_capture_time = "",
          end_time = as.character(end_time)) %>% 
-  filter(end_time > "03:00:00")
+  filter(end_time > "03:00:00",
+         !capture_loc == "off transect")
 
 write.csv(greater_time_error, here("above_capture_error.csv"))
 
@@ -307,7 +336,8 @@ less_time_error <- time_check %>%
   mutate(correct_capture_time = "",
          end_time = as.character(end_time)) %>% 
   filter(end_time > "02:00:00",
-         end_time < "23:45:00")
+         end_time < "23:45:00",
+         !capture_loc == "off transect")
 
 write.csv(less_time_error, here("below_capture_error.csv"))
 ```
@@ -424,11 +454,12 @@ write_csv(id_check, here("duplicate_swabs.csv"))
 
 pan_data <- read_csv(here("data", "panama_data.csv")) %>% 
   clean_names() %>% 
-  select(region, site, observers, swab_id, date) %>% 
+  select(region, site, observers, swab_id, date, species, observers, start_time, end_time, transect, capture_time, notes_amphib1,
+         notes_amphib2, notes_species_merge) %>%
   mutate(date = parse_date(date),
          visit_date = date) %>% 
-  drop_na() %>% 
-  relocate(visit_date, .before = swab_id)
+  relocate(visit_date, .before = swab_id) %>% 
+  filter(site == "Altos de Piedra")
 
 swabs_date <- pan_data %>% 
   mutate(swab_date = swab_id,
