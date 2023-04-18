@@ -320,7 +320,7 @@ write.csv(capture_bio, here("data", "capture.csv"))
 
 
 time_check <- pan_data %>% 
-  select(region, site, date, start_time, end_time, capture_time, capture_loc, swab_id)
+  select(region, site, date, start_time, end_time, capture_time, capture_loc, swab_id, detection_type)
 
 greater_time_error <- time_check %>% 
   filter(capture_time > end_time) %>% 
